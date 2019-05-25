@@ -77,6 +77,41 @@ def fitline(x,y):
  
   return (m,c)
 
+def lambdaref_led():
+# load the reference (LED lamp) lambda spectrum (P4170230.JPG)
+# 
+# calibration based on 
+# Hg lamp spectrum P4170229.JPG
+# 3 most intense lines at
+#  pixels 605.   1534.  1802.
+#  lambda 435.8  546.1  578.0 
+#  see, e.g., https://en.wikipedia.org/wiki/Mercury-vapor_lamp
+#  reddest line is a blend, so I took an average
+#  leading by least squares fitting to 
+#  lambda= 0.11877957016041925 * pixel +  363.9299046659294
+#  cal transferred to P4170230.JPG
+#  both spectra extracted with rows=(1776,2503) cols=(1,3500)
+
+  y = collapse('P4170230.JPG',(1776,2503),(1,3500))
+  x = 0.11878 * np.arange(3500) +  363.9299
+  
+  return(x,y)
+
+def lambdacal_led(file,rows,cols):
+# read and 
+# calibrate a lambda spectrum with the reference lambda spectrum
+  y = collapse(file,rows,cols)
+  x2,y2 = lambdaref_led()
+  c = np.correlate(y2,y,mode='same')
+  #plt.plot(c)
+  #plt.show()
+  shift = np.mean(np.where(c == np.max(c))) - len(y)/2.
+  shift = shift * 0.11878 # from pixels to nm
+  x = x2 + shift
+  print('shift=',shift,' nm') 
+  
+  return (x,y)
+
 def lambdaref():
 # load the reference lambda spectrum (P4170195.JPG)
 # 
@@ -93,24 +128,25 @@ def lambdaref():
 #  both spectra extracted with rows=(1776,2503) cols=(1,3500)
 
   y = collapse('P4170195.JPG',(1776,2503),(1,3500))
-  x = 0.11895993980931158 * np.arange(3500) +  367.6186370842082
+  x = 0.11896 * np.arange(3500) +  367.6186
   
   return(x,y)
 
 def lambdacal(file,rows,cols):
 # read and 
-# calibrate a lambda spectrum with the reference lambda spectrum
+# calibrate a lambda spectrum with the reference fluorescent lamp spectrum
   y = collapse(file,rows,cols)
   x2,y2 = lambdaref()
   c = np.correlate(y2,y,mode='same')
   #plt.plot(c)
   #plt.show()
   shift = np.mean(np.where(c == np.max(c))) - len(y)/2.
-  shift = shift * 0.11895993980931158 # from pixels to nm
+  shift = shift * 0.11896 # from pixels to nm
   x = x2 - shift
-  print('shift=',shift* 0.11895993980931158,' nm') 
+  print('shift=',shift* 0.11896,' nm') 
   
   return (x,y)
+
 
 def fluxcal(file,rows,cols,x):
 # read and flux calibrate with the reference response spectrum
@@ -142,11 +178,11 @@ if __name__ == "__main__":
   for file in calfiles:
     file=file.rstrip()
     print('calibrating ',file,' ...')
-    x,y = lambdacal(file,rows,(1,3500))
-    x.tofile(file+'.x.dat',sep=" ",format='%s')
-    y.tofile(file+'.y.dat',sep=" ",format='%s')
+    x,y = lambdacal_led(file,rows,(1,3500))
+    np.savetxt(file+'.x.dat',x,delimiter=" ",fmt='%s')
+    np.savetxt(file+'.y.dat',y,delimiter=" ",fmt='%s')
   for file in targetfiles:
     file=file.rstrip()
     print('collapsing ',file,' ...')
     y = collapse(file,rows,(1,3500))
-    y.tofile(file+'.y.dat',sep=" ",format='%s')
+    np.savetxt(file+'.y.dat',y,delimiter=" ",fmt='%s')
