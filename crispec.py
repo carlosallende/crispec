@@ -26,6 +26,7 @@ python3 crispec.py ni
 
 """
 import os
+import sys
 import numpy as np
 import glob
 import time
