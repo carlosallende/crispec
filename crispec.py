@@ -432,7 +432,7 @@ if __name__ == "__main__":
   assert (npar <= 2), 'Synple requires at maximum 1 input parameter'
   argumento = ""
   if npar > 1: argumento = sys.argv[1]
-  if argument == 'ni': plt.ion()
+  if argumento == 'ni': plt.ion()
 
   flog = open('crislog','w')
   flog.write("starting data reduction ...\n")
