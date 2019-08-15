@@ -335,7 +335,7 @@ def getsolar():
   
   return(x,y)
 
-def flux_ratio(rr,gg,bb,rref,gref,bref,snr=50.):
+def flux_ratio(rr,gg,bb,rref,gref,bref,snr=10.):
 #takes the ratio of two collapsed spectra in the three bands for two sources and combines when 
 #by producing a weighted average of the data with a minimum snr
 
